@@ -2,11 +2,16 @@ import type { Request, Response } from "express";
 import { issueService } from "./issue.service";
 
 const createIssue = async (req: Request, res: Response) => {
-    //   console.log(req.body);
-
+    // console.log(req.body);
+    // console.log(req?.user);
     try {
-        const result = await issueService.createIssue(req.body);
-        console.log(result);
+        // console.log("from controller", req.user);
+        
+        const result = await issueService.createIssue({
+                ...req.body,
+                reporter_id: req?.user?.id,
+            });
+        // console.log(result);
         res.status(201).json(
             {
                 success: true,

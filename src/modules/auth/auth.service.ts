@@ -56,7 +56,7 @@ const createUser = async (payload: RawUser) => {
     `,
         [name, email, hashedPassword, role],
     );
-    console.log("Db:", result);
+    // console.log("Db:", result);
     delete result.rows[0].password;
 
     return result;

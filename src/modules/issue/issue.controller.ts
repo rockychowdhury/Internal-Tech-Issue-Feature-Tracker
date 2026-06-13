@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { issueService } from "./issue.service";
+import { ResponseMessages } from "../../constants";
 
 const createIssue = async (req: Request, res: Response) => {
     // console.log(req.body);
@@ -30,112 +31,106 @@ const createIssue = async (req: Request, res: Response) => {
     }
 };
 
-// const getAllIssue = async (req: Request, res: Response) => {
-//     console.log("COntroller", req.user);
-//     try {
-//         const result = await userService.getAllUsersFromDB();
-//         res.status(200).json({
-//             success: true,
-//             message: "Users retrived successfully!",
-//             data: result.rows,
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({
-//             success: false,
-//             message: error.message,
-//             error: error,
-//         });
-//     }
-// };
+const getAllIssue = async (req: Request, res: Response) => {
+    try {
+        const result = await issueService.getAllIssueFromDB();
+        res.status(200).json({
+            success: true,
+            message: ResponseMessages.RETRIEVED_SUCCESS,
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
 
-// const getIssue = async (req: Request, res: Response) => {
-//     const { id } = req.params;
-//     try {
-//         const result = await userService.getSingleUserFromDB(id as string);
-//         if (result.rows.length === 0) {
-//             res.status(404).json({
-//                 success: false,
-//                 message: "User Not found!",
-//                 data: {},
-//             });
-//         }
+const getIssue = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const result = await issueService.getIssueFromDB(id as string);
+        if (!result) {
+            res.status(404).json({
+                success: false,
+                message: ResponseMessages.NOT_FOUND,
+                data: {},
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: ResponseMessages.RETRIEVED_SUCCESS,
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
 
-//         res.status(200).json({
-//             success: true,
-//             message: "User retrived successfully!",
-//             data: result.rows[0],
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({
-//             success: false,
-//             message: error.message,
-//             error: error,
-//         });
-//     }
-// };
+const updateIssue = async (req: Request, res: Response) => {
+    const { id } = req.params;
 
-// const updateIssue = async (req: Request, res: Response) => {
-//     const { id } = req.params;
+    try {
+        const result = await issueService.updateIssueFromDB(req.body, id as string);
 
-//     // console.log("Id : ", id);
-//     // console.log({ name, password, age, is_active });
+        if (result.rows.length === 0) {
+            res.status(404).json({
+                success: false,
+                message: ResponseMessages.NOT_FOUND,
+            });
+        }
 
-//     try {
-//         const result = await userService.updateUserFromDB(req.body, id as string);
+        // console.log(result);
+        res.status(200).json({
+            success: true,
+            message: ResponseMessages.UPDATED_SUCCESS,
+            data: result.rows[0],
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
 
-//         if (result.rows.length === 0) {
-//             res.status(404).json({
-//                 success: false,
-//                 message: "User Not found!",
-//             });
-//         }
+const deleteIssue = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const result = await issueService.deleteIssueFromDB(id as string);
 
-//         // console.log(result);
-//         res.status(200).json({
-//             success: true,
-//             message: "User updated successfully!",
-//             data: result.rows[0],
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({
-//             success: false,
-//             message: error.message,
-//             error: error,
-//         });
-//     }
-// };
+        if (result.rowCount === 0) {
+            res.status(404).json({
+                success: false,
+                message: ResponseMessages.NOT_FOUND,
+            });
+        }
 
-// const deleteIssue = async (req: Request, res: Response) => {
-//     const { id } = req.params;
-//     try {
-//         const result = await userService.deleteUserFromDB(id as string);
-
-//         console.log(result);
-//         if (result.rowCount === 0) {
-//             res.status(404).json({
-//                 success: false,
-//                 message: "User Not found!",
-//             });
-//         }
-
-//         res.status(200).json({
-//             success: true,
-//             message: "User deleted successfully!",
-//             data: {},
-//         });
-//     } catch (error: any) {
-//         res.status(500).json({
-//             success: false,
-//             message: error.message,
-//             error: error,
-//         });
-//     }
-// };
+        res.status(200).json({
+            success: true,
+            message: ResponseMessages.DELETED_SUCCESS,
+            data: {},
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error,
+        });
+    }
+};
 
 export const issueController = {
     createIssue,
-    // getAllIssue,
-    // getIssue,
-    // updateIssue,
-    // deleteIssue,
+    getAllIssue,
+    getIssue,
+    updateIssue,
+    deleteIssue,
 };

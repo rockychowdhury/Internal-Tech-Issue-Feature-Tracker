@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { authService } from "./auth.service";
 import { ResponseMessages } from "../../constants";
+import sendResponse from "../../utility/apiResponse";
 
 
 const loginUser = async (req: Request, res: Response) => {
@@ -27,22 +28,19 @@ const loginUser = async (req: Request, res: Response) => {
 }
 
 
-const registerUser = async (req: Request, res: Response) => {
+const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await authService.createUser(req.body);
-        res.send(result);
-        res.status(201).send({
+
+        sendResponse(res, {
+            statusCode: 201,
             success: true,
             message: ResponseMessages.CREATED_SUCCESS,
             data: result.rows[0],
         });
 
-    } catch (error: any) {
-        res.status(500).send({
-            success: false,
-            message: error.message,
-            error: error,
-        });
+    } catch (error) {
+        next(error);
     }
 }
 export const authController = { loginUser, registerUser };

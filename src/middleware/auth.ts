@@ -4,6 +4,7 @@ import config from "../config";
 import { pool } from "../db";
 import type { ROLE } from "../@types";
 import { ResponseMessages } from "../constants";
+import sendResponse from "../utility/apiResponse";
 
 const auth = (...roles: ROLE[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -12,9 +13,11 @@ const auth = (...roles: ROLE[]) => {
             const token = req.headers.authorization;
             // console.log(token);
             if (!token) {
-                res.status(401).json({
+                sendResponse(res, {
+                    statusCode: 401,
                     success: false,
-                    message: ResponseMessages.TOKEN_INVALID
+                    message: ResponseMessages.TOKEN_INVALID,
+                    data: {}
                 });
             }
 
@@ -33,9 +36,11 @@ const auth = (...roles: ROLE[]) => {
             // console.log(userData);
 
             if (userData.rows.length === 0) {
-                res.status(404).json({
+                sendResponse(res, {
+                    statusCode: 404,
                     success: false,
-                    message: "User not found!",
+                    message: ResponseMessages.NOT_FOUND,
+                    data: {}
                 });
             }
 
@@ -44,16 +49,18 @@ const auth = (...roles: ROLE[]) => {
             // console.log(user);
 
             if (roles.length && !roles.includes(user.role)) {
-                res.status(403).json({
+                sendResponse(res, {
+                    statusCode: 403,
                     success: false,
                     message: ResponseMessages.UNAUTHORIZED,
+                    data: {}
                 });
             }
-
             req.user = decoded;
-
             next();
+
         } catch (error) {
+            // console.log(error);
             next(error);
         }
     };

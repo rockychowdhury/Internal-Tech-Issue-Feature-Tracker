@@ -3,7 +3,7 @@ import type { IIssue } from "./issue.interface";
 
 
 const createIssue = async (payload: IIssue) => {
-    const {title, description, type, reporter_id} = payload;
+    const { title, description, type, reporter_id } = payload;
     // console.log(payload);
     const result = await pool.query(
         `
@@ -14,57 +14,114 @@ const createIssue = async (payload: IIssue) => {
 
     return result;
 };
-// const getAllIssueFromDB = async () => {
-//     const result = await pool.query(`
-//       SELECT * FROM users  
-//         `);
-//     return result;
-// };
+const getAllIssueFromDB = async () => {
+    const result = await pool.query(`
+      SELECT * FROM issues  
+        `);
 
-// const getIssueFromDB = async (id: string) => {
-//     const result = await pool.query(
-//         `
-//       SELECT * FROM users WHERE id=$1  
-//         `,
-//         [id],
-//     );
-//     return result;
-// };
+    const issues = result.rows;
 
-// const updateIssueFromDB = async (payload: IUser, id: string) => {
-//     const { name, password, age, is_active } = payload;
+    if (issues.length === 0) return [];
 
-//     const result = await pool.query(
-//         `
-//     UPDATE users 
-//     SET 
-//     name=COALESCE($1,name),
-//     password=COALESCE($2,password),
-//     age=COALESCE($3,age),
-//     is_active=COALESCE($4,is_active) 
+    const reporterIds = [...new Set(issues.map(issue => issue.reporter_id))];
 
-//     WHERE id=$5 RETURNING *
-//     `,
-//         [name, password, age, is_active, id],
-//     );
+    const userResult = await pool.query(
+        `
+        SELECT id,name,role
+        FROM users
+        WHERE id = ANY($1)
+        `,
+        [reporterIds]
+    );
 
-//     return result;
-// };
+    const reporterMap = new Map();
 
-// const deleteIssueFromDB = async (id: string) => {
-//     const result = await pool.query(
-//         `
-//     DELETE FROM users WHERE id=$1  
-//       `,
-//         [id],
-//     );
-//     return result;
-// };
+    userResult.rows.forEach(user => {
+        reporterMap.set(user.id, {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+        });
+    });
+
+    const IssueData = issues.map(issue => ({
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        type: issue.type,
+        status: issue.status,
+        reporter: reporterMap.get(issue.reporter_id) || null,
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
+    }));
+
+    return IssueData;
+};
+
+const getIssueFromDB = async (id: string) => {
+    const result = await pool.query(
+        `
+      SELECT * FROM issues WHERE id=$1  
+        `,
+        [id],
+    );
+    if (result.rows.length === 0) {
+        return null;
+    }
+    const issue = result.rows[0];
+    const reporter = await pool.query(
+        `
+        SELECT id,name,role
+        FROM users
+        WHERE id = $1
+        `,
+        [issue.reporter_id]
+    )
+    return {
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        type: issue.type,
+        status: issue.status,
+        reporter: reporter.rows[0] || null,
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
+    };
+};
+
+const updateIssueFromDB = async (payload: IIssue, id: string) => {
+    const { title, description, type } = payload;
+
+    const result = await pool.query(
+        `
+    UPDATE issues 
+    SET 
+    title=COALESCE($1,title),
+    description=COALESCE($2,description),
+    type=COALESCE($3,type)
+
+    WHERE id=$4 RETURNING *
+    `,
+        [title, description, type, id],
+    );
+
+    return result;
+};
+
+const deleteIssueFromDB = async (id: string) => {
+    const result = await pool.query(
+        `
+        DELETE FROM issues WHERE id=$1  
+        `,
+        [id],
+    );
+    return result;
+};
 
 export const issueService = {
     createIssue,
-    // getAllIssueFromDB,
-    // getIssueFromDB,
-    // updateIssueFromDB,
-    // deleteIssueFromDB,
+    getAllIssueFromDB,
+    getIssueFromDB,
+    updateIssueFromDB,
+    deleteIssueFromDB,
 };

@@ -1,4 +1,6 @@
 // custom types and interfaces 
 import { type ApiResponse } from './response';
 
-export {type ApiResponse}
+type ROLE = "contributor" | "maintainer";
+
+export {type ApiResponse, type ROLE}

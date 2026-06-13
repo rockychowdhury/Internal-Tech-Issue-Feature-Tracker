@@ -12,7 +12,9 @@ dotenv.config(
 
 const config = {
     connection_string : process.env.NEONDB as string,
-    port : process.env.PORT 
+    port : process.env.PORT ,
+    secret: process.env.secret,
+    re_secret: process.env.secret,
 };
 
 export default config;

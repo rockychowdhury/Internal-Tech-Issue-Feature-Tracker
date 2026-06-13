@@ -20,7 +20,7 @@ export const initDB = async () => {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
     `);
-        console.log("Users table initialized successfully.");
+        // console.log("Users table initialized successfully.");
         await pool.query(`
     CREATE TABLE IF NOT EXISTS issues (
         id SERIAL PRIMARY KEY,
@@ -33,7 +33,7 @@ export const initDB = async () => {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
     `);
-        console.log("Issues table initialized successfully.");
+        // console.log("Issues table initialized successfully.");
 
     } catch (error) {
         console.error("Error initializing database:", error);

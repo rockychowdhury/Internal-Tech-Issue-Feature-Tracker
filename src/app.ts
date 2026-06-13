@@ -3,22 +3,25 @@ import express, {
     type Request, 
     type Response 
 } from "express";
+import cors from "cors";
 import { authRoute } from "./modules/auth/auth.route";
 import { issueRoute } from "./modules/issue/issue.route";
 import { globalErrorHandler } from "./middleware/globalErrorHandler";
+import { initDB } from "./db";
 
 
 
 const app : Application = express();
 
+initDB();
+
 // app.use(CookieParser());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-// app.use(cors(
-//     {
-//         origin: ""
-//     }
-// ));
 
 
 

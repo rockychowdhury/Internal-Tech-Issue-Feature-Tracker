@@ -14,10 +14,31 @@ const createIssue = async (payload: IIssue) => {
 
     return result;
 };
-const getAllIssueFromDB = async () => {
-    const result = await pool.query(`
-      SELECT * FROM issues  
-        `);
+const getAllIssueFromDB = async (filters: { sort?: string; type?: string; status?: string }) => {
+    const { sort = "newest", type, status } = filters;
+
+    let queryText = "SELECT * FROM issues";
+    const queryParams: any[] = [];
+    const conditions: string[] = [];
+
+    if (type) {
+        queryParams.push(type);
+        conditions.push(`type = $${queryParams.length}`);
+    }
+
+    if (status) {
+        queryParams.push(status);
+        conditions.push(`status = $${queryParams.length}`);
+    }
+
+    if (conditions.length > 0) {
+        queryText += " WHERE " + conditions.join(" AND ");
+    }
+
+    const sortOrder = sort === "oldest" ? "ASC" : "DESC";
+    queryText += ` ORDER BY created_at ${sortOrder}`;
+
+    const result = await pool.query(queryText, queryParams);
 
     const issues = result.rows;
 
@@ -89,8 +110,8 @@ const getIssueFromDB = async (id: string) => {
     };
 };
 
-const updateIssueFromDB = async (payload: IIssue, id: string) => {
-    const { title, description, type } = payload;
+const updateIssueFromDB = async (payload: Partial<IIssue>, id: string) => {
+    const { title, description, type, status } = payload;
 
     const result = await pool.query(
         `
@@ -98,11 +119,12 @@ const updateIssueFromDB = async (payload: IIssue, id: string) => {
     SET 
     title=COALESCE($1,title),
     description=COALESCE($2,description),
-    type=COALESCE($3,type)
-
-    WHERE id=$4 RETURNING *
+    type=COALESCE($3,type),
+    status=COALESCE($4,status),
+    updated_at = CURRENT_TIMESTAMP
+    WHERE id=$5 RETURNING *
     `,
-        [title, description, type, id],
+        [title, description, type, status, id],
     );
 
     return result;

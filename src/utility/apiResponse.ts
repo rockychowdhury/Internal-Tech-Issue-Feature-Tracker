@@ -6,14 +6,22 @@ type TResponse<T> = {
     success: boolean;
     message: string;
     data?: T;
+    errors?: any;
 };
 
 const sendResponse = <T>(res: Response, data: TResponse<T>) => {
-    res.status(data.statusCode).json({
+    const responseBody: any = {
         success: data.success,
         message: data.message,
-        data: data.data,
-    });
+    };
+
+    if (data.success) {
+        responseBody.data = data.data !== undefined ? data.data : null;
+    } else {
+        responseBody.errors = data.errors !== undefined ? data.errors : null;
+    }
+
+    res.status(data.statusCode).json(responseBody);
 };
 
 export default sendResponse;

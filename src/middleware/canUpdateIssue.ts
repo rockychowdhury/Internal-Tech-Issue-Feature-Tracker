@@ -19,15 +19,21 @@ const hasPermission = () => {
                 `,
                 [id]
             );
+            if (issueData.rows.length == 0) {
+                return sendResponse(res, {
+                    statusCode: 404,
+                    success: false,
+                    message: ResponseMessages.NOT_FOUND,
+                });
+            }
             const issue = issueData.rows[0];
-            console.log(issue);
+            // console.log(issue);
             if (issue.status == "open" && issue.reporter_id == user?.id) return next();
 
-            sendResponse(res, {
+            return sendResponse(res, {
                 statusCode: 403,
                 success: false,
                 message: ResponseMessages.PERMISSION_DENIED,
-                data: {}
             });
 
         } catch (error) {

@@ -1,4 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
+import { ResponseMessages } from "../constants";
+import sendResponse from "../utility/apiResponse";
 
 export const globalErrorHandler = (
     err: any,
@@ -8,16 +10,26 @@ export const globalErrorHandler = (
 ) => {
 
     if (err.code === "23505") {
-        return res.status(400).json({
+        return sendResponse(res, {
+            statusCode: 400,
             success: false,
-            message: "Email already exists",
-            error:err
+            message: ResponseMessages.USER_ALREADY_EXISTS,
+            errors: err,
+        });
+    }
+    if (err.name == "JsonWebTokenError" || err.name == "TokenExpiredError") {
+        return sendResponse(res, {
+            statusCode: 401,
+            success: false,
+            message: ResponseMessages.TOKEN_INVALID,
+            errors: err,
         });
     }
 
-    return res.status(err?.statusCode??500).json({
+    return sendResponse(res, {
+        statusCode: err?.statusCode ?? 500,
         success: false,
-        message: "Internal Server Error",
-        error: err,
+        message: err?.message || ResponseMessages.SERVER_ERROR,
+        errors: err,
     });
 };

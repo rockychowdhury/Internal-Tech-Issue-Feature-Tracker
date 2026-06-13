@@ -8,21 +8,23 @@ const loginUser = async (req: Request, res: Response) => {
     try {
         const { user, accessToken } = await authService.loginUserIntoDB(req.body);
 
-        res.status(200).json({
-            "success": true,
-            "message": "Login successful",
-            "data": {
-                "token": accessToken,
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: "Login successful",
+            data: {
+                token: accessToken,
                 user,
             }
-        })
+        });
 
     } catch (error: any) {
         // console.log(error);
-        res.status(401).json({
+        sendResponse(res, {
+            statusCode: 401,
             success: false,
             message: error.message,
-            error: error,
+            errors: error,
         });
     }
 }

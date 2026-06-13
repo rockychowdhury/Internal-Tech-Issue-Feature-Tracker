@@ -13,11 +13,10 @@ const auth = (...roles: ROLE[]) => {
             const token = req.headers.authorization;
             // console.log(token);
             if (!token) {
-                sendResponse(res, {
+                return sendResponse(res, {
                     statusCode: 401,
                     success: false,
                     message: ResponseMessages.TOKEN_INVALID,
-                    data: {}
                 });
             }
 
@@ -36,11 +35,10 @@ const auth = (...roles: ROLE[]) => {
             // console.log(userData);
 
             if (userData.rows.length === 0) {
-                sendResponse(res, {
+                return sendResponse(res, {
                     statusCode: 404,
                     success: false,
                     message: ResponseMessages.NOT_FOUND,
-                    data: {}
                 });
             }
 
@@ -49,11 +47,10 @@ const auth = (...roles: ROLE[]) => {
             // console.log(user);
 
             if (roles.length && !roles.includes(user.role)) {
-                sendResponse(res, {
+                return sendResponse(res, {
                     statusCode: 403,
                     success: false,
                     message: ResponseMessages.UNAUTHORIZED,
-                    data: {}
                 });
             }
             req.user = decoded;
